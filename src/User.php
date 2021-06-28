@@ -99,9 +99,10 @@ final class User implements iUser
         $email = $bean->email;
         $password = $bean->password;
         $role = Role::fromBean($bean->role);
-        $role->setBeanDetails($bean);
+        $user = new User($email, $password, $role);
+        $user->setBeanDetails($bean);
 
-        return new User($email, $password, $role);
+        return $user;
     }
 
 }
