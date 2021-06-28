@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FluencePrototype\Auth;
 
 use FluencePrototype\Session\SessionService;
+use RedBeanPHP\R;
 
 /**
  * Class AuthenticationService
