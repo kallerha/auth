@@ -98,7 +98,7 @@ final class User implements iUser
     {
         $email = $bean->email;
         $password = $bean->password;
-        $role = new Role($bean->role);
+        $role = User::fromBean($bean->role);
         $role->setBeanDetails($bean);
 
         return new User($email, $password, $role);
