@@ -59,9 +59,10 @@ class Role implements iRole
     public static function fromBean(OODBBean $bean): static
     {
         $role = $bean->role;
+        $role = new Role($role);
         $role->setBeanDetails($bean);
 
-        return new Role($role);
+        return $role;
     }
 
 }
