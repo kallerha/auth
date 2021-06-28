@@ -87,6 +87,8 @@ final class User implements iUser
         $bean->email = $this->email;
         $bean->password = $this->password;
         $bean->role = $this->role->toBean();
+
+        return $bean;
     }
 
     /**
