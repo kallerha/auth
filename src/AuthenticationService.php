@@ -78,7 +78,7 @@ class AuthenticationService
         if ($this->isLoggedIn()) {
             $userId = $this->sessionService->get(self::SESSION_USER_ID);
 
-            if ($userBean = R::findOne('user', '`id` = ? AND `deleted` = FALSE', [$userId])) {
+            if ($userBean = R::findOne('user', '`id` = ? AND `deleted` IS NULL', [$userId])) {
                 return User::fromBean($userBean);
             }
         }
