@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FluencePrototype\Auth;
 
 use FluencePrototype\Bean\Bean;
+use RedBeanPHP\OODB;
 
 /**
  * Class User
