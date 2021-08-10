@@ -29,8 +29,7 @@ class AcceptRoles
         $authenticationServer = new AuthenticationService();
         $user = $authenticationServer->getUserIfLoggedIn();
 
-        if ((count($roles) === 1 && $roles[0] === 'unauthorized') ||
-            !($user && in_array(needle: $user->getRole()->getRole(), haystack: $roles, strict: true))) {
+        if (!($user && in_array(needle: $user->getRole()->getRole(), haystack: $roles, strict: true))) {
             $reflectionClass = new ReflectionClass($responseClass);
 
             if ($reflectionClass->implementsInterface(iResponse::class)) {
