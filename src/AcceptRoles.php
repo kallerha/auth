@@ -6,6 +6,8 @@ namespace FluencePrototype\Auth;
 
 use Attribute;
 use FluencePrototype\Http\Messages\iResponse;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class AcceptRoles
@@ -17,16 +19,23 @@ class AcceptRoles
 
     /**
      * AcceptRoles constructor.
-     * @param iResponse $response
+     * @param string $responseClass
+     * @param array $parameters
      * @param string ...$roles
+     * @throws ReflectionException
      */
-    public function __construct(iResponse $response, string ...$roles)
+    public function __construct(string $responseClass, array $parameters, string ...$roles)
     {
         $authenticationServer = new AuthenticationService();
         $user = $authenticationServer->getUserIfLoggedIn();
 
         if (!($user && in_array(needle: $user->getRole()->getRole(), haystack: $roles, strict: true))) {
-            $response->render();
+            $reflectionClass = new ReflectionClass($responseClass);
+
+            if ($reflectionClass->implementsInterface(iResponse::class)) {
+                $response = $reflectionClass->newInstanceArgs($parameters);
+                $response->render();
+            }
         }
     }
 
