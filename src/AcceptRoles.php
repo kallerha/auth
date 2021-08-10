@@ -14,11 +14,11 @@ use FluencePrototype\Http\Messages\iResponse;
 #[Attribute(Attribute::TARGET_CLASS)]
 class AcceptRoles
 {
-
+    
     /**
      * AcceptRoles constructor.
+     * @param iResponse $response
      * @param string ...$roles
-     * @throws ForbiddenException
      */
     public function __construct(iResponse $response, string ...$roles)
     {
