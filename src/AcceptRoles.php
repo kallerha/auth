@@ -24,7 +24,7 @@ class AcceptRoles
      * @param string ...$userRoles
      * @throws ReflectionException
      */
-    public function __construct(string $responseClass, array $parameters, string ...$userRoles)
+    public function __construct(string $responseClass, array $parameters, array $userRoles)
     {
         $authenticationServer = new AuthenticationService();
         $userRole = $authenticationServer->getUserRoleIfLoggedIn();
