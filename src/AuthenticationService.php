@@ -38,6 +38,8 @@ class AuthenticationService
         $this->sessionService->set(self::SESSION_USER_ID, $user->getId());
         $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());
         $this->sessionService->set(self::SESSION_TIME, time());
+
+        session_regenerate_id(delete_old_session: true);
     }
 
     /**
@@ -48,6 +50,8 @@ class AuthenticationService
         $this->sessionService->unset(self::SESSION_USER_ID);
         $this->sessionService->unset(self::SESSION_USER_ROLE);
         $this->sessionService->unset(self::SESSION_TIME);
+
+        session_destroy();
     }
 
     /**
@@ -68,6 +72,8 @@ class AuthenticationService
             }
 
             $this->sessionService->set(self::SESSION_TIME, time());
+
+            session_regenerate_id(delete_old_session: true);
 
             return true;
         }
