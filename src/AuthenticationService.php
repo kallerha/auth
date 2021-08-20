@@ -16,8 +16,9 @@ class AuthenticationService
 
     private const TIME_SESSION = 3600;
     private const TIME_COOKIE = 365 * 86400;
-    private const SESSION_USER_ID = 'g8k4dlf0ne4jfoj49r';
-    private const SESSION_TIME = 'y546y6d8lo897o785j';
+    private const SESSION_USER_ID = 'session_user_id';
+    private const SESSION_USER_ROLE = 'session_user_role';
+    private const SESSION_TIME = 'session_time';
 
     private SessionService $sessionService;
 
@@ -35,6 +36,7 @@ class AuthenticationService
     public function authorize(User $user): void
     {
         $this->sessionService->set(self::SESSION_USER_ID, $user->getId());
+        $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());
         $this->sessionService->set(self::SESSION_TIME, time());
     }
 
@@ -44,6 +46,7 @@ class AuthenticationService
     public function unauthorize(): void
     {
         $this->sessionService->unset(self::SESSION_USER_ID);
+        $this->sessionService->unset(self::SESSION_USER_ROLE);
         $this->sessionService->unset(self::SESSION_TIME);
     }
 
@@ -52,7 +55,9 @@ class AuthenticationService
      */
     public function isLoggedIn(): bool
     {
-        if ($this->sessionService->isSet(self::SESSION_USER_ID) && $this->sessionService->isSet(self::SESSION_TIME)) {
+        if ($this->sessionService->isSet(self::SESSION_USER_ID)
+            && $this->sessionService->isSet(self::SESSION_USER_ROLE)
+            && $this->sessionService->isSet(self::SESSION_TIME)) {
             $pastTime = $this->sessionService->get(self::SESSION_TIME);
             $currentTime = time();
 
@@ -81,6 +86,18 @@ class AuthenticationService
             if ($userBean = R::findOne('user', '`id` = ? AND `deleted` IS NULL', [$userId])) {
                 return User::fromBean($userBean);
             }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUserRoleIfLoggedIn(): ?string
+    {
+        if ($this->isLoggedIn()) {
+            return $this->sessionService->get(self::SESSION_USER_ROLE);
         }
 
         return null;

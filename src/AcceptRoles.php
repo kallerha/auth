@@ -21,15 +21,15 @@ class AcceptRoles
      * AcceptRoles constructor.
      * @param string $responseClass
      * @param array $parameters
-     * @param string ...$roles
+     * @param string ...$userRoles
      * @throws ReflectionException
      */
-    public function __construct(string $responseClass, array $parameters, string ...$roles)
+    public function __construct(string $responseClass, array $parameters, string ...$userRoles)
     {
         $authenticationServer = new AuthenticationService();
-        $user = $authenticationServer->getUserIfLoggedIn();
+        $userRole = $authenticationServer->getUserRoleIfLoggedIn();
 
-        if (!($user && in_array(needle: $user->getRole()->getRole(), haystack: $roles, strict: true))) {
+        if (!($userRole && in_array(needle: $userRole, haystack: $userRoles, strict: true))) {
             $reflectionClass = new ReflectionClass($responseClass);
 
             if ($reflectionClass->implementsInterface(iResponse::class)) {
