@@ -27,7 +27,6 @@ class AuthenticationService
      */
     public function __construct()
     {
-        
         $this->sessionService = new SessionService();
     }
 
