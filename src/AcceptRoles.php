@@ -29,7 +29,7 @@ class AcceptRoles
         $authenticationServer = new AuthenticationService();
         $userRole = $authenticationServer->getUserRoleIfLoggedIn();
 
-        if (count($userRoles) === 1 && array_pop($userRoles) === 'guest') {
+        if (count($userRoles) === 1 && $userRoles[0] === 'guest') {
             if ($userRole) {
                 $reflectionClass = new ReflectionClass($responseClass);
 
