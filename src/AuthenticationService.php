@@ -51,6 +51,7 @@ class AuthenticationService
         $this->sessionService->unset(self::SESSION_USER_ROLE);
         $this->sessionService->unset(self::SESSION_TIME);
 
+        session_unset();
         session_destroy();
     }
 
