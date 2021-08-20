@@ -37,14 +37,14 @@ class AcceptRoles
                     $response = $reflectionClass->newInstanceArgs($parameters);
                     $response->render();
                 }
-            } else {
-                if (!($userRole && in_array(needle: $userRole, haystack: $userRoles, strict: true))) {
-                    $reflectionClass = new ReflectionClass($responseClass);
+            }
+        } else {
+            if (!($userRole && in_array(needle: $userRole, haystack: $userRoles, strict: true))) {
+                $reflectionClass = new ReflectionClass($responseClass);
 
-                    if ($reflectionClass->implementsInterface(iResponse::class)) {
-                        $response = $reflectionClass->newInstanceArgs($parameters);
-                        $response->render();
-                    }
+                if ($reflectionClass->implementsInterface(iResponse::class)) {
+                    $response = $reflectionClass->newInstanceArgs($parameters);
+                    $response->render();
                 }
             }
         }
