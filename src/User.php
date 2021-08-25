@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FluencePrototype\Auth;
 
 use FluencePrototype\Bean\Bean;
-use FluencePrototype\Validation\Validators\EmailProviderValidation;
 use FluencePrototype\Validation\Validators\EmailValidation;
 use FluencePrototype\Validation\Validators\NotEmptyValidation;
 use RedBeanPHP\OODBBean;
@@ -19,9 +18,8 @@ final class User implements iUser
 
     use Bean;
 
-    #[EmailProviderValidation('Du skal angive en gyldig email')]
-    #[EmailValidation('Du skal angive en gyldig email')]
     #[NotEmptyValidation('Du skal angive en email')]
+    #[EmailValidation('Du skal angive en gyldig email')]
     private string $email;
 
     #[NotEmptyValidation('Du skal angive en adgangskode')]
