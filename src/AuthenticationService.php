@@ -85,7 +85,7 @@ class AuthenticationService
     /**
      * @return string|null
      */
-    public function getUserRoleIfLoggedIn(): ?string
+    public function getUserRole(): ?string
     {
         if ($userRole = $this->sessionService->get(self::SESSION_USER_ROLE)) {
             return $userRole;

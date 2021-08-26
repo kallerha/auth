@@ -27,7 +27,7 @@ class AcceptRoles
     public function __construct(string $responseClass, array $parameters, array $userRoles)
     {
         $authenticationServer = new AuthenticationService();
-        $userRole = $authenticationServer->getUserRoleIfLoggedIn();
+        $userRole = $authenticationServer->getUserRole();
 
         if (count($userRoles) === 1 && $userRoles[0] === 'guest') {
             if ($userRole) {
