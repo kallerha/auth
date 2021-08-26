@@ -39,7 +39,9 @@ class AcceptRoles
                 }
             }
         } else {
-            if (!($userRole && in_array(needle: $userRole, haystack: $userRoles, strict: true))) {
+            if (!($authenticationServer->isLoggedIn()
+                && $userRole
+                && in_array(needle: $userRole, haystack: $userRoles, strict: true))) {
                 $reflectionClass = new ReflectionClass($responseClass);
 
                 if ($reflectionClass->implementsInterface(iResponse::class)) {

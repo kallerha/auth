@@ -83,28 +83,12 @@ class AuthenticationService
     }
 
     /**
-     * @return User|null
-     */
-    public function getUserIfLoggedIn(): ?User
-    {
-        if ($this->isLoggedIn()) {
-            $userId = $this->sessionService->get(self::SESSION_USER_ID);
-
-            if ($userBean = R::findOne('user', '`id` = ? AND `deleted` IS NULL', [$userId])) {
-                return User::fromBean($userBean);
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * @return string|null
      */
     public function getUserRoleIfLoggedIn(): ?string
     {
-        if ($this->isLoggedIn()) {
-            return $this->sessionService->get(self::SESSION_USER_ROLE);
+        if ($userRole = $this->sessionService->get(self::SESSION_USER_ROLE)) {
+            return $userRole;
         }
 
         return null;
