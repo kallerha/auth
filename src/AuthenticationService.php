@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FluencePrototype\Auth;
 
 use FluencePrototype\Session\SessionService;
-use RedBeanPHP\R;
 
 /**
  * Class AuthenticationService
@@ -15,7 +14,6 @@ class AuthenticationService
 {
 
     private const TIME_SESSION = 3600;
-    private const TIME_COOKIE = 365 * 86400;
     private const SESSION_USER_ID = 'session_user_id';
     private const SESSION_USER_ROLE = 'session_user_role';
     private const SESSION_TIME = 'session_time';
@@ -80,6 +78,19 @@ class AuthenticationService
         }
 
         return false;
+    }
+
+
+    /**
+     * @return int|null
+     */
+    public function getUserId(): ?int
+    {
+        if ($userId = $this->sessionService->get(self::SESSION_USER_ID)) {
+            return $userId;
+        }
+
+        return null;
     }
 
     /**
