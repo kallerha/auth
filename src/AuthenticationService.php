@@ -41,7 +41,7 @@ class AuthenticationService
             session_start();
         }
 
-        session_regenerate_id(delete_old_session: true);
+        session_regenerate_id(delete_old_session: false);
         session_write_close();
     }
 
@@ -75,8 +75,6 @@ class AuthenticationService
             $currentTime = time();
 
             if ($currentTime - $pastTime > self::TIME_SESSION) {
-                $this->unauthorize();
-
                 return false;
             }
 
@@ -86,7 +84,7 @@ class AuthenticationService
                 session_start();
             }
 
-            session_regenerate_id(delete_old_session: true);
+            session_regenerate_id(delete_old_session: false);
             session_write_close();
 
             return true;
