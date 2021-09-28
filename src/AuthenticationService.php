@@ -37,7 +37,12 @@ class AuthenticationService
         $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());
         $this->sessionService->set(self::SESSION_TIME, time());
 
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         session_regenerate_id(delete_old_session: true);
+        session_write_close();
     }
 
     /**
@@ -49,8 +54,13 @@ class AuthenticationService
         $this->sessionService->unset(self::SESSION_USER_ROLE);
         $this->sessionService->unset(self::SESSION_TIME);
 
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         session_unset();
         session_destroy();
+        session_write_close();
     }
 
     /**
@@ -72,7 +82,12 @@ class AuthenticationService
 
             $this->sessionService->set(self::SESSION_TIME, time());
 
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+
             session_regenerate_id(delete_old_session: true);
+            session_write_close();
 
             return true;
         }
