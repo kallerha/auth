@@ -75,6 +75,8 @@ class AuthenticationService
             $currentTime = time();
 
             if ($currentTime - $pastTime > self::TIME_SESSION) {
+                $this->unauthorize();
+                
                 return false;
             }
 
