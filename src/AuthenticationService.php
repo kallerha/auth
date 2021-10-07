@@ -44,11 +44,11 @@ class AuthenticationService
         $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());
         $this->sessionService->set(self::SESSION_TIME, time());
 
-        if ($rememberMe === true) {
-            if (session_status() !== PHP_SESSION_ACTIVE) {
-                session_start();
-            }
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
+        if ($rememberMe === true) {
             try {
                 $reflectionClass = new ReflectionClass(ClassLoader::class);
                 $vendorDir = dirname($reflectionClass->getFileName(), 2);
@@ -87,10 +87,10 @@ EOF;
                 );
             } catch (ReflectionException) {
             }
-
-            session_regenerate_id(delete_old_session: false);
-            session_write_close();
         }
+
+        session_regenerate_id(delete_old_session: false);
+        session_write_close();
     }
 
     /**
@@ -156,6 +156,14 @@ EOF;
 
                             return true;
                         }
+
+                        setcookie(
+                            $_ENV['JWT_COOKIE_NAME'],
+                            '',
+                            -1,
+                            '/',
+                            $_ENV['JWT_COOKIE_DOMAIN']
+                        );
                     }
                 } catch (ExpiredException | ReflectionClass) {
                 }
@@ -168,6 +176,13 @@ EOF;
             }
 
             $this->sessionService->set(self::SESSION_TIME, time());
+
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+
+            session_regenerate_id(delete_old_session: false);
+            session_write_close();
 
             return true;
         }
