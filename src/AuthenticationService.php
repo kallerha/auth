@@ -30,6 +30,7 @@ class AuthenticationService
 
     /**
      * @param User $user
+     * @param bool $rememberMe
      */
     public function authorize(User $user, bool $rememberMe = false): void
     {
