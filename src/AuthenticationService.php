@@ -31,7 +31,7 @@ class AuthenticationService
     /**
      * @param User $user
      */
-    public function authorize(User $user): void
+    public function authorize(User $user, bool $rememberMe = false): void
     {
         $this->sessionService->set(self::SESSION_USER_ID, $user->getId());
         $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());

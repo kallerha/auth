@@ -16,6 +16,8 @@ use RedBeanPHP\OODBBean;
 final class User implements iUser
 {
 
+    public const BEAN = 'user';
+
     use Bean;
 
     #[NotEmptyValidation('Du skal angive en email')]
@@ -90,7 +92,7 @@ final class User implements iUser
      */
     public function toBean(): OODBBean
     {
-        $bean = $this->findOrDispense('user');
+        $bean = $this->findOrDispense(User::BEAN);
         $bean->email = $this->email;
         $bean->password = $this->password;
         $bean->role = $this->role->toBean();
