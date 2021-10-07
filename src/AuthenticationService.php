@@ -44,11 +44,11 @@ class AuthenticationService
         $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());
         $this->sessionService->set(self::SESSION_TIME, time());
 
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         if ($rememberMe === true) {
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+
             try {
                 $reflectionClass = new ReflectionClass(ClassLoader::class);
                 $vendorDir = dirname($reflectionClass->getFileName(), 2);
@@ -87,10 +87,10 @@ EOF;
                 );
             } catch (ReflectionException) {
             }
-        }
 
-        session_regenerate_id(delete_old_session: false);
-        session_write_close();
+            session_regenerate_id(delete_old_session: false);
+            session_write_close();
+        }
     }
 
     /**
@@ -98,13 +98,13 @@ EOF;
      */
     public function unauthorize(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         $this->sessionService->unset(self::SESSION_USER_ID);
         $this->sessionService->unset(self::SESSION_USER_ROLE);
         $this->sessionService->unset(self::SESSION_TIME);
+
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
         setcookie(
             $_ENV['JWT_COOKIE_NAME'],
@@ -167,14 +167,7 @@ EOF;
                 return false;
             }
 
-            if (session_status() !== PHP_SESSION_ACTIVE) {
-                session_start();
-            }
-
             $this->sessionService->set(self::SESSION_TIME, time());
-
-            session_regenerate_id(delete_old_session: false);
-            session_write_close();
 
             return true;
         }
