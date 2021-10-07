@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FluencePrototype\Auth;
 
+use Application\Config;
 use Composer\Autoload\ClassLoader;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
@@ -80,7 +81,7 @@ EOF;
                     $jwtToken,
                     $currentTime + $_ENV['JWT_COOKIE_EXPIRY'],
                     '/',
-                    $_ENV['HOST'],
+                    $_ENV['JWT_COOKIE_DOMAIN'],
                     true,
                     true
                 );
@@ -97,13 +98,21 @@ EOF;
      */
     public function unauthorize(): void
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         $this->sessionService->unset(self::SESSION_USER_ID);
         $this->sessionService->unset(self::SESSION_USER_ROLE);
         $this->sessionService->unset(self::SESSION_TIME);
 
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        setcookie(
+            $_ENV['JWT_COOKIE_NAME'],
+            '',
+            -1,
+            '/',
+            $_ENV['JWT_COOKIE_DOMAIN']
+        );
 
         session_unset();
         session_destroy();
@@ -137,7 +146,14 @@ EOF;
 EOF;
 
                     if ($payload = JWT::decode($jwtToken, $publicKey, ['RS256'])) {
-                        if ($this->sessionService->get(self::SESSION_USER_ID) === $payload['claims']->userId) {
+                        if ($this->sessionService->get(self::SESSION_USER_ID) === $payload->claims->userId) {
+                            if (session_status() !== PHP_SESSION_ACTIVE) {
+                                session_start();
+                            }
+
+                            session_regenerate_id(delete_old_session: false);
+                            session_write_close();
+
                             return true;
                         }
                     }
@@ -151,11 +167,11 @@ EOF;
                 return false;
             }
 
-            $this->sessionService->set(self::SESSION_TIME, time());
-
             if (session_status() !== PHP_SESSION_ACTIVE) {
                 session_start();
             }
+
+            $this->sessionService->set(self::SESSION_TIME, time());
 
             session_regenerate_id(delete_old_session: false);
             session_write_close();
