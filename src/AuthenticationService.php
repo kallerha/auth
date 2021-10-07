@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace FluencePrototype\Auth;
 
+use Composer\Autoload\ClassLoader;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWT;
 use FluencePrototype\Session\SessionService;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class AuthenticationService
@@ -42,6 +47,47 @@ class AuthenticationService
             session_start();
         }
 
+        if ($rememberMe === true) {
+            try {
+                $reflectionClass = new ReflectionClass(ClassLoader::class);
+                $vendorDir = dirname($reflectionClass->getFileName(), 2);
+
+                ob_start();
+
+                include $vendorDir . '/../jwt_private_key';
+
+                $privateKeyContent = ob_get_clean();
+
+                $privateKey = <<<EOF
+{$privateKeyContent}
+EOF;
+
+                $currentTime = time();
+
+                $payload = [
+                    'exp' => $currentTime + $_ENV['JWT_COOKIE_EXPIRY'],
+                    'iat' => $currentTime,
+                    'iss' => $_ENV['JWT_ISSUER'],
+                    'claims' => [
+                        'userId' => $user->getId()
+                    ]
+                ];
+
+                $jwtToken = JWT::encode($payload, $privateKey, 'RS256');
+
+                setcookie(
+                    $_ENV['JWT_COOKIE_NAME'],
+                    $jwtToken,
+                    $currentTime + $_ENV['JWT_COOKIE_EXPIRY'],
+                    '/',
+                    $_ENV['HOST'],
+                    true,
+                    true
+                );
+            } catch (ReflectionException) {
+            }
+        }
+
         session_regenerate_id(delete_old_session: false);
         session_write_close();
     }
@@ -75,9 +121,33 @@ class AuthenticationService
             $pastTime = $this->sessionService->get(self::SESSION_TIME);
             $currentTime = time();
 
+            if ($jwtToken = filter_input(INPUT_COOKIE, $_ENV['JWT_COOKIE_NAME'], FILTER_SANITIZE_STRING)) {
+                try {
+                    $reflectionClass = new ReflectionClass(ClassLoader::class);
+                    $vendorDir = dirname($reflectionClass->getFileName(), 2);
+
+                    ob_start();
+
+                    include $vendorDir . '/../jwt_public_key';
+
+                    $publicKeyContent = ob_get_clean();
+
+                    $publicKey = <<<EOF
+{$publicKeyContent}
+EOF;
+
+                    if ($payload = JWT::decode($jwtToken, $publicKey, ['RS256'])) {
+                        if ($this->sessionService->get(self::SESSION_USER_ID) === $payload['claims']->userId) {
+                            return true;
+                        }
+                    }
+                } catch (ExpiredException | ReflectionClass) {
+                }
+            }
+
             if ($currentTime - $pastTime > self::TIME_SESSION) {
                 $this->unauthorize();
-                
+
                 return false;
             }
 
