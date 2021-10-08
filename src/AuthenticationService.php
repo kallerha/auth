@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace FluencePrototype\Auth;
 
-use Application\Config;
 use Composer\Autoload\ClassLoader;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use FluencePrototype\Session\SessionService;
+use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
 
@@ -29,7 +29,7 @@ class AuthenticationService
     /**
      * AuthenticationService constructor.
      */
-    public function __construct()
+    #[Pure] public function __construct()
     {
         $this->sessionService = new SessionService();
     }
@@ -40,9 +40,9 @@ class AuthenticationService
      */
     public function authorize(User $user, bool $rememberMe = false): void
     {
-        $this->sessionService->set(self::SESSION_USER_ID, $user->getId());
-        $this->sessionService->set(self::SESSION_USER_ROLE, $user->getRole()->getRole());
-        $this->sessionService->set(self::SESSION_TIME, time());
+        $this->sessionService->set(AuthenticationService::SESSION_USER_ID, $user->getId());
+        $this->sessionService->set(AuthenticationService::SESSION_USER_ROLE, $user->getRole()->getRole());
+        $this->sessionService->set(AuthenticationService::SESSION_TIME, time());
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -60,7 +60,7 @@ class AuthenticationService
                 $privateKeyContent = ob_get_clean();
 
                 $privateKey = <<<EOF
-{$privateKeyContent}
+$privateKeyContent
 EOF;
 
                 $currentTime = time();
@@ -98,9 +98,9 @@ EOF;
      */
     public function unauthorize(): void
     {
-        $this->sessionService->unset(self::SESSION_USER_ID);
-        $this->sessionService->unset(self::SESSION_USER_ROLE);
-        $this->sessionService->unset(self::SESSION_TIME);
+        $this->sessionService->unset(AuthenticationService::SESSION_USER_ID);
+        $this->sessionService->unset(AuthenticationService::SESSION_USER_ROLE);
+        $this->sessionService->unset(AuthenticationService::SESSION_TIME);
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -124,10 +124,10 @@ EOF;
      */
     public function isLoggedIn(): bool
     {
-        if ($this->sessionService->isSet(self::SESSION_USER_ID)
-            && $this->sessionService->isSet(self::SESSION_USER_ROLE)
-            && $this->sessionService->isSet(self::SESSION_TIME)) {
-            $pastTime = $this->sessionService->get(self::SESSION_TIME);
+        if ($this->sessionService->isSet(AuthenticationService::SESSION_USER_ID)
+            && $this->sessionService->isSet(AuthenticationService::SESSION_USER_ROLE)
+            && $this->sessionService->isSet(AuthenticationService::SESSION_TIME)) {
+            $pastTime = $this->sessionService->get(AuthenticationService::SESSION_TIME);
             $currentTime = time();
 
             if ($jwtToken = filter_input(INPUT_COOKIE, $_ENV['JWT_COOKIE_NAME'], FILTER_SANITIZE_STRING)) {
@@ -142,11 +142,11 @@ EOF;
                     $publicKeyContent = ob_get_clean();
 
                     $publicKey = <<<EOF
-{$publicKeyContent}
+$publicKeyContent
 EOF;
 
                     if ($payload = JWT::decode($jwtToken, $publicKey, ['RS256'])) {
-                        if ($this->sessionService->get(self::SESSION_USER_ID) === $payload->claims->userId) {
+                        if ($this->sessionService->get(AuthenticationService::SESSION_USER_ID) === $payload->claims->userId) {
                             if (session_status() !== PHP_SESSION_ACTIVE) {
                                 session_start();
                             }
@@ -165,17 +165,17 @@ EOF;
                             $_ENV['JWT_COOKIE_DOMAIN']
                         );
                     }
-                } catch (ExpiredException | ReflectionClass) {
+                } catch (ExpiredException | ReflectionException) {
                 }
             }
 
-            if ($currentTime - $pastTime > self::TIME_SESSION) {
+            if ($currentTime - $pastTime > AuthenticationService::TIME_SESSION) {
                 $this->unauthorize();
 
                 return false;
             }
 
-            $this->sessionService->set(self::SESSION_TIME, time());
+            $this->sessionService->set(AuthenticationService::SESSION_TIME, time());
 
             if (session_status() !== PHP_SESSION_ACTIVE) {
                 session_start();
@@ -194,9 +194,9 @@ EOF;
     /**
      * @return int|null
      */
-    public function getUserId(): ?int
+    public function getUserId(): null|int
     {
-        if ($userId = $this->sessionService->get(self::SESSION_USER_ID)) {
+        if ($userId = $this->sessionService->get(AuthenticationService::SESSION_USER_ID)) {
             return $userId;
         }
 
@@ -206,9 +206,9 @@ EOF;
     /**
      * @return string|null
      */
-    public function getUserRole(): ?string
+    public function getUserRole(): null|string
     {
-        if ($userRole = $this->sessionService->get(self::SESSION_USER_ROLE)) {
+        if ($userRole = $this->sessionService->get(AuthenticationService::SESSION_USER_ROLE)) {
             return $userRole;
         }
 
