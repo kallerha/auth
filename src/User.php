@@ -103,8 +103,12 @@ final class User implements iUser
     /**
      * @inheritDoc
      */
-    public static function fromBean(OODBBean $bean): static
+    public static function fromBean(null|OODBBean $bean): null|static
     {
+        if (!$bean) {
+            return null;
+        }
+
         $email = $bean->email;
         $password = $bean->password;
         $role = Role::fromBean($bean->role);
