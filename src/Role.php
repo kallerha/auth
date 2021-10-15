@@ -56,8 +56,12 @@ class Role implements iRole
     /**
      * @inheritDoc
      */
-    public static function fromBean(OODBBean $bean): static
+    public static function fromBean(null|OODBBean $bean): null|static
     {
+        if (!$bean) {
+            return null;
+        }
+
         $role = $bean->role;
         $role = new Role($role);
         $role->setBeanDetails($bean);
