@@ -215,4 +215,12 @@ EOF;
         return null;
     }
 
+    /**
+     * @param string $role
+     */
+    public function setUserRole(string $role): void
+    {
+        $this->sessionService->set(AuthenticationService::SESSION_USER_ROLE, $role);
+    }
+
 }
