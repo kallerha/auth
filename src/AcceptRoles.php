@@ -6,6 +6,7 @@ namespace FluencePrototype\Auth;
 
 use Attribute;
 use FluencePrototype\Http\Messages\iResponse;
+use FluencePrototype\Http\Messages\Response\StatusCodes;
 use RedBeanPHP\R;
 use ReflectionClass;
 use ReflectionException;
@@ -59,9 +60,15 @@ class AcceptRoles
             $userRole = $user->getRole()->getRole();
 
             if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
-                $authenticationServer->unauthorize();
+                if ($authenticationServer->getUserRole() !== $userRole) {
+                    $authenticationServer->unauthorize();
 
-                return false;
+                    return false;
+                }
+
+                http_response_code(StatusCodes::UNAUTHORIZED);
+
+                exit;
             }
 
             return true;
