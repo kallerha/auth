@@ -13,11 +13,10 @@
   ],
   "require": {
     "php": ">=8.0.0",
-    "ext-sodium": "*",
-    "fluence-prototype/bean": "^1.0",
-    "fluence-prototype/http": "^1.0",
-    "fluence-prototype/session": "^1.0",
-    "fluence-prototype/validation": "^1.0",
+    "fluence-prototype/bean": "^2.0",
+    "fluence-prototype/http": "^2.0",
+    "fluence-prototype/session": "^2.0",
+    "fluence-prototype/validation": "^2.0",
     "firebase/php-jwt": "^5.4"
   },
   "autoload": {
