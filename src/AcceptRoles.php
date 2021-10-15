@@ -61,14 +61,16 @@ class AcceptRoles
 
             if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
                 if ($authenticationServer->getUserRole() !== $userRole) {
-                    $authenticationServer->unauthorize();
-
-                    return false;
+                    $authenticationServer->setUserRole($userRole);
                 }
 
                 http_response_code(StatusCodes::UNAUTHORIZED);
 
                 exit;
+            }
+
+            if ($authenticationServer->getUserRole() !== $userRole) {
+                $authenticationServer->setUserRole($userRole);
             }
 
             return true;
