@@ -6,6 +6,7 @@ namespace FluencePrototype\Auth;
 
 use Attribute;
 use FluencePrototype\Http\Messages\iResponse;
+use RedBeanPHP\R;
 use ReflectionClass;
 use ReflectionException;
 
@@ -26,30 +27,43 @@ class AcceptRoles
      */
     public function __construct(string $responseClass, array $parameters, array $userRoles)
     {
-        $authenticationServer = new AuthenticationService();
-        $userRole = $authenticationServer->getUserRole();
+        if (!$this->isAuthorized(userRoles: $userRoles)) {
+            $reflectionClass = new ReflectionClass(objectOrClass: $responseClass);
 
-        if (count($userRoles) === 1 && $userRoles[0] === 'guest') {
-            if ($userRole) {
-                $reflectionClass = new ReflectionClass($responseClass);
-
-                if ($reflectionClass->implementsInterface(iResponse::class)) {
-                    $response = $reflectionClass->newInstanceArgs($parameters);
-                    $response->render();
-                }
-            }
-        } else {
-            if (!($authenticationServer->isLoggedIn()
-                && $userRole
-                && in_array(needle: $userRole, haystack: $userRoles, strict: true))) {
-                $reflectionClass = new ReflectionClass($responseClass);
-
-                if ($reflectionClass->implementsInterface(iResponse::class)) {
-                    $response = $reflectionClass->newInstanceArgs($parameters);
-                    $response->render();
-                }
+            if ($reflectionClass->implementsInterface(interface: iResponse::class)) {
+                $response = $reflectionClass->newInstanceArgs(args: $parameters);
+                $response->render();
             }
         }
+    }
+
+    /**
+     * @param array $userRoles
+     * @return bool
+     */
+    private function isAuthorized(array $userRoles): bool
+    {
+        if (count($userRoles) === 1 && $userRoles[0] === 'anyone') {
+            return true;
+        }
+
+        $authenticationServer = new AuthenticationService();
+
+        if ($authenticationServer->isLoggedIn()) {
+            if (count($userRoles) === 1 && $userRoles[0] === 'guest') {
+                return false;
+            }
+
+            $userId = $authenticationServer->getUserId();
+            $user = User::fromBean(R::findOne(User::BEAN, '`id` = ?', [$userId]));
+            $userRole = $user->getRole()->getRole();
+
+            if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }
