@@ -43,27 +43,35 @@ class AcceptRoles
      */
     private function isAuthorized(array $userRoles): bool
     {
-        if (count($userRoles) === 1 && $userRoles[0] === 'anyone') {
+        if (empty($userRoles) || (count(value: $userRoles) === 1 && $userRoles[0] === 'anyone')) {
             return true;
         }
 
         $authenticationServer = new AuthenticationService();
 
         if ($authenticationServer->isLoggedIn()) {
-            if (count($userRoles) === 1 && $userRoles[0] === 'guest') {
+            if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
                 return false;
             }
 
             $userId = $authenticationServer->getUserId();
-            $user = User::fromBean(R::findOne(User::BEAN, '`id` = ?', [$userId]));
+            $user = User::fromBean(R::findOne(type: User::BEAN, sql: '`id` = ?', bindings: [$userId]));
             $userRole = $user->getRole()->getRole();
 
             if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
+                $authenticationServer->unauthorize();
+
                 return false;
             }
+
+            return true;
         }
 
-        return true;
+        if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
+            return true;
+        }
+
+        return false;
     }
 
 }
