@@ -14,6 +14,8 @@ use RedBeanPHP\OODBBean;
 class Role implements iRole
 {
 
+    public const BEAN = 'role';
+
     use Bean;
 
     private string $role;
@@ -47,7 +49,7 @@ class Role implements iRole
      */
     public function toBean(): OODBBean
     {
-        $bean = $this->findOrDispense('role');
+        $bean = $this->findOrDispense(Role::BEAN);
         $bean->role = $this->role;
 
         return $bean;
