@@ -118,4 +118,9 @@ final class User implements iUser
         return $user;
     }
 
+    public function cleanup(): void
+    {
+        // TODO: Implement cleanup() method.
+    }
+
 }

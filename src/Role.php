@@ -71,4 +71,9 @@ class Role implements iRole
         return $role;
     }
 
+    public function cleanup(): void
+    {
+        // TODO: Implement cleanup() method.
+    }
+
 }
