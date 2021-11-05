@@ -20,7 +20,6 @@ use ReflectionException;
 class AuthenticationService
 {
 
-    private const TIME_SESSION = 3600;
     private const SESSION_USER_ID = 'session_user_id';
     private const SESSION_USER_ROLE = 'session_user_role';
     private const SESSION_TIME = 'session_time';
@@ -145,7 +144,7 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
+                    if (($payload = JWT::decode(jwt: $jwtToken, keyOrKeyArray: $publicKey, allowed_algs: ['RS256'])) &&
                         is_object($payload) &&
                         isset($payload->claims) &&
                         isset($payload->claims->userId) &&
@@ -180,7 +179,7 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
+                    if (($payload = JWT::decode(jwt: $jwtToken, keyOrKeyArray: $publicKey, allowed_algs: ['RS256'])) &&
                         is_object($payload) &&
                         isset($payload->claims) &&
                         isset($payload->claims->userId) &&
@@ -198,7 +197,7 @@ EOF;
                 }
             }
 
-            if ($currentTime - $pastTime > AuthenticationService::TIME_SESSION) {
+            if ($currentTime - $pastTime > $_ENV['SESSION_AUTH_TIME']) {
                 $this->unauthorize();
 
                 return false;
