@@ -51,7 +51,7 @@ class AuthenticationService
         if ($rememberMe === true) {
             try {
                 $reflectionClass = new ReflectionClass(objectOrClass: ClassLoader::class);
-                $vendorDir = dirname($reflectionClass->getFileName(), levels: 2);
+                $vendorDir = dirname(path: $reflectionClass->getFileName(), levels: 2);
 
                 ob_start();
 
@@ -126,16 +126,16 @@ EOF;
      */
     public function isLoggedIn(): bool
     {
-        if ($this->sessionService->isSet(AuthenticationService::SESSION_USER_ID)
-            && $this->sessionService->isSet(AuthenticationService::SESSION_USER_ROLE)
-            && $this->sessionService->isSet(AuthenticationService::SESSION_TIME)) {
-            $pastTime = $this->sessionService->get(AuthenticationService::SESSION_TIME);
+        if ($this->sessionService->isSet(name: AuthenticationService::SESSION_USER_ID)
+            && $this->sessionService->isSet(name: AuthenticationService::SESSION_USER_ROLE)
+            && $this->sessionService->isSet(name: AuthenticationService::SESSION_TIME)) {
+            $pastTime = $this->sessionService->get(name: AuthenticationService::SESSION_TIME);
             $currentTime = time();
 
-            if ($jwtToken = filter_input(INPUT_COOKIE, $_ENV['JWT_COOKIE_NAME'], FILTER_SANITIZE_STRING)) {
+            if ($jwtToken = filter_input(type: INPUT_COOKIE, var_name: $_ENV['JWT_COOKIE_NAME'], filter: FILTER_SANITIZE_STRING)) {
                 try {
-                    $reflectionClass = new ReflectionClass(ClassLoader::class);
-                    $vendorDir = dirname($reflectionClass->getFileName(), 2);
+                    $reflectionClass = new ReflectionClass(objectOrClass: ClassLoader::class);
+                    $vendorDir = dirname(path: $reflectionClass->getFileName(), levels: 2);
 
                     ob_start();
 
@@ -147,8 +147,8 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if ($payload = JWT::decode($jwtToken, $publicKey, ['RS256'])) {
-                        if ($this->sessionService->get(AuthenticationService::SESSION_USER_ID) === $payload->claims->userId) {
+                    if ($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) {
+                        if ($this->sessionService->get(name: AuthenticationService::SESSION_USER_ID) === $payload->claims->userId) {
                             if (session_status() !== PHP_SESSION_ACTIVE) {
                                 session_start();
                             }
@@ -179,7 +179,7 @@ EOF;
                 return false;
             }
 
-            $this->sessionService->set(AuthenticationService::SESSION_TIME, time());
+            $this->sessionService->set(name: AuthenticationService::SESSION_TIME, value: time());
 
             if (session_status() !== PHP_SESSION_ACTIVE) {
                 session_start();
@@ -199,7 +199,7 @@ EOF;
      */
     public function getUserId(): null|int
     {
-        if ($userId = $this->sessionService->get(AuthenticationService::SESSION_USER_ID)) {
+        if ($userId = $this->sessionService->get(name: AuthenticationService::SESSION_USER_ID)) {
             return $userId;
         }
 
@@ -211,7 +211,7 @@ EOF;
      */
     public function getUserRole(): null|string
     {
-        if ($userRole = $this->sessionService->get(AuthenticationService::SESSION_USER_ROLE)) {
+        if ($userRole = $this->sessionService->get(name: AuthenticationService::SESSION_USER_ROLE)) {
             return $userRole;
         }
 
@@ -223,7 +223,7 @@ EOF;
      */
     public function setUserRole(string $role): void
     {
-        $this->sessionService->set(AuthenticationService::SESSION_USER_ROLE, $role);
+        $this->sessionService->set(name: AuthenticationService::SESSION_USER_ROLE, value: $role);
     }
 
 }

@@ -49,7 +49,7 @@ class Role implements iRole
      */
     public function toBean(): OODBBean
     {
-        $bean = $this->findOrDispense(Role::class);
+        $bean = $this->findOrDispense(className: Role::class);
         $bean->role = $this->role;
 
         return $bean;
@@ -65,8 +65,8 @@ class Role implements iRole
         }
 
         $role = $bean->role;
-        $role = new Role($role);
-        $role->setBeanDetails($bean);
+        $role = new Role(role: $role);
+        $role->setBeanDetails(bean: $bean);
 
         return $role;
     }

@@ -48,10 +48,6 @@ class AcceptRoles
             return true;
         }
 
-        if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
-            return true;
-        }
-
         $authenticationService = new AuthenticationService();
 
         if ($authenticationService->isLoggedIn()) {
@@ -68,11 +64,15 @@ class AcceptRoles
             }
 
             if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
-                http_response_code(StatusCodes::UNAUTHORIZED);
+                http_response_code(response_code: StatusCodes::UNAUTHORIZED);
 
                 exit;
             }
 
+            return true;
+        }
+
+        if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
             return true;
         }
 

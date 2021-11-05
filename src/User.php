@@ -92,7 +92,7 @@ final class User implements iUser
      */
     public function toBean(): OODBBean
     {
-        $bean = $this->findOrDispense(User::class);
+        $bean = $this->findOrDispense(className: User::class);
         $bean->email = $this->email;
         $bean->password = $this->password;
         $bean->role = $this->role->toBean();
@@ -111,9 +111,9 @@ final class User implements iUser
 
         $email = $bean->email;
         $password = $bean->password;
-        $role = Role::fromBean($bean->role);
-        $user = new User($email, $password, $role);
-        $user->setBeanDetails($bean);
+        $role = Role::fromBean(bean: $bean->role);
+        $user = new User(email: $email, password: $password, role: $role);
+        $user->setBeanDetails(bean: $bean);
 
         return $user;
     }
