@@ -56,7 +56,7 @@ class AcceptRoles
             }
 
             $userId = $authenticationService->getUserId();
-            $user = Bean::findOne(className: User::class, sql: '`id` = ?', bindings: [$userId]);
+            $user = Bean::findOne(className: User::class, sql: '`id` = ? AND `deleted` IS NULL', bindings: [$userId]);
             $userRole = $user->getRole()->getRole();
 
             if ($authenticationService->getUserRole() !== $userRole) {

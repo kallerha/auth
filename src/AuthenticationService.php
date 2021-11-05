@@ -7,6 +7,7 @@ namespace FluencePrototype\Auth;
 use Composer\Autoload\ClassLoader;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
+use FluencePrototype\Bean\Bean;
 use FluencePrototype\Session\SessionService;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
@@ -126,6 +127,38 @@ EOF;
      */
     public function isLoggedIn(): bool
     {
+        if (!($this->sessionService->isSet(name: AuthenticationService::SESSION_USER_ID)
+            && $this->sessionService->isSet(name: AuthenticationService::SESSION_USER_ROLE)
+            && $this->sessionService->isSet(name: AuthenticationService::SESSION_TIME))) {
+            if ($jwtToken = filter_input(type: INPUT_COOKIE, var_name: $_ENV['JWT_COOKIE_NAME'], filter: FILTER_SANITIZE_STRING)) {
+                try {
+                    $reflectionClass = new ReflectionClass(objectOrClass: ClassLoader::class);
+                    $vendorDir = dirname(path: $reflectionClass->getFileName(), levels: 2);
+
+                    ob_start();
+
+                    include $vendorDir . '/../jwt_public_key';
+
+                    $publicKeyContent = ob_get_clean();
+
+                    $publicKey = <<<EOF
+$publicKeyContent
+EOF;
+
+                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
+                        is_object($payload) &&
+                        isset($payload->claims) &&
+                        isset($payload->claims->userId) &&
+                        ($user = Bean::findOne(className: User::class, sql: '`id` = ? AND `deleted` IS NULL', bindings: [$payload->claims->userId]))) {
+                        $this->sessionService->set(name: AuthenticationService::SESSION_USER_ID, value: $user->getId());
+                        $this->sessionService->set(name: AuthenticationService::SESSION_USER_ROLE, value: $user->getRole()->getRole());
+                        $this->sessionService->set(name: AuthenticationService::SESSION_TIME, value: time());
+                    }
+                } catch (ExpiredException | ReflectionException) {
+                }
+            }
+        }
+
         if ($this->sessionService->isSet(name: AuthenticationService::SESSION_USER_ID)
             && $this->sessionService->isSet(name: AuthenticationService::SESSION_USER_ROLE)
             && $this->sessionService->isSet(name: AuthenticationService::SESSION_TIME)) {
@@ -147,27 +180,19 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if ($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) {
-                        if ($this->sessionService->get(name: AuthenticationService::SESSION_USER_ID) === $payload->claims->userId) {
-                            if (session_status() !== PHP_SESSION_ACTIVE) {
-                                session_start();
-                            }
-
-                            session_regenerate_id(delete_old_session: false);
-                            session_write_close();
-
-                            return true;
+                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
+                        is_object($payload) &&
+                        isset($payload->claims) &&
+                        isset($payload->claims->userId) &&
+                        $this->sessionService->get(name: AuthenticationService::SESSION_USER_ID) === $payload->claims->userId) {
+                        if (session_status() !== PHP_SESSION_ACTIVE) {
+                            session_start();
                         }
 
-                        setcookie(
-                            $_ENV['JWT_COOKIE_NAME'],
-                            '',
-                            -1,
-                            '/',
-                            $_ENV['JWT_COOKIE_DOMAIN'],
-                            true,
-                            true
-                        );
+                        session_regenerate_id(delete_old_session: false);
+                        session_write_close();
+
+                        return true;
                     }
                 } catch (ExpiredException | ReflectionException) {
                 }
