@@ -40,9 +40,9 @@ class AuthenticationService
      */
     public function authorize(User $user, bool $rememberMe = false): void
     {
-        $this->sessionService->set(AuthenticationService::SESSION_USER_ID, $user->getId());
-        $this->sessionService->set(AuthenticationService::SESSION_USER_ROLE, $user->getRole()->getRole());
-        $this->sessionService->set(AuthenticationService::SESSION_TIME, time());
+        $this->sessionService->set(name: AuthenticationService::SESSION_USER_ID, value: $user->getId());
+        $this->sessionService->set(name: AuthenticationService::SESSION_USER_ROLE, value: $user->getRole()->getRole());
+        $this->sessionService->set(name: AuthenticationService::SESSION_TIME, value: time());
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -50,8 +50,8 @@ class AuthenticationService
 
         if ($rememberMe === true) {
             try {
-                $reflectionClass = new ReflectionClass(ClassLoader::class);
-                $vendorDir = dirname($reflectionClass->getFileName(), 2);
+                $reflectionClass = new ReflectionClass(objectOrClass: ClassLoader::class);
+                $vendorDir = dirname($reflectionClass->getFileName(), levels: 2);
 
                 ob_start();
 
@@ -74,16 +74,16 @@ EOF;
                     ]
                 ];
 
-                $jwtToken = JWT::encode($payload, $privateKey, 'RS256');
+                $jwtToken = JWT::encode(payload: $payload, key: $privateKey, alg: 'RS256');
 
                 setcookie(
-                    $_ENV['JWT_COOKIE_NAME'],
-                    $jwtToken,
-                    $currentTime + $_ENV['JWT_COOKIE_EXPIRY'],
-                    '/',
-                    $_ENV['JWT_COOKIE_DOMAIN'],
-                    true,
-                    true
+                    name: $_ENV['JWT_COOKIE_NAME'],
+                    value: $jwtToken,
+                    expires_or_options: $currentTime + $_ENV['JWT_COOKIE_EXPIRY'],
+                    path: '/',
+                    domain: $_ENV['JWT_COOKIE_DOMAIN'],
+                    secure: true,
+                    httponly: true
                 );
             } catch (ReflectionException) {
             }
@@ -98,20 +98,22 @@ EOF;
      */
     public function unauthorize(): void
     {
-        $this->sessionService->unset(AuthenticationService::SESSION_USER_ID);
-        $this->sessionService->unset(AuthenticationService::SESSION_USER_ROLE);
-        $this->sessionService->unset(AuthenticationService::SESSION_TIME);
+        $this->sessionService->unset(name: AuthenticationService::SESSION_USER_ID);
+        $this->sessionService->unset(name: AuthenticationService::SESSION_USER_ROLE);
+        $this->sessionService->unset(name: AuthenticationService::SESSION_TIME);
 
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
 
         setcookie(
-            $_ENV['JWT_COOKIE_NAME'],
-            '',
-            -1,
-            '/',
-            $_ENV['JWT_COOKIE_DOMAIN']
+            name: $_ENV['JWT_COOKIE_NAME'],
+            value: '',
+            expires_or_options: -1,
+            path: '/',
+            domain: $_ENV['JWT_COOKIE_DOMAIN'],
+            secure: true,
+            httponly: true
         );
 
         session_unset();
@@ -162,7 +164,9 @@ EOF;
                             '',
                             -1,
                             '/',
-                            $_ENV['JWT_COOKIE_DOMAIN']
+                            $_ENV['JWT_COOKIE_DOMAIN'],
+                            true,
+                            true
                         );
                     }
                 } catch (ExpiredException | ReflectionException) {
@@ -189,7 +193,6 @@ EOF;
 
         return false;
     }
-
 
     /**
      * @return int|null

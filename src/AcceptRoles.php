@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace FluencePrototype\Auth;
 
 use Attribute;
+use FluencePrototype\Bean\Bean;
 use FluencePrototype\Http\Messages\iResponse;
 use FluencePrototype\Http\Messages\Response\StatusCodes;
-use RedBeanPHP\R;
 use ReflectionClass;
 use ReflectionException;
 
@@ -48,35 +48,31 @@ class AcceptRoles
             return true;
         }
 
-        $authenticationServer = new AuthenticationService();
+        if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
+            return true;
+        }
 
-        if ($authenticationServer->isLoggedIn()) {
+        $authenticationService = new AuthenticationService();
+
+        if ($authenticationService->isLoggedIn()) {
             if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
                 return false;
             }
 
-            $userId = $authenticationServer->getUserId();
-            $user = User::fromBean(R::findOne(type: User::BEAN, sql: '`id` = ?', bindings: [$userId]));
+            $userId = $authenticationService->getUserId();
+            $user = Bean::findOne(className: User::class, sql: '`id` = ?', bindings: [$userId]);
             $userRole = $user->getRole()->getRole();
 
-            if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
-                if ($authenticationServer->getUserRole() !== $userRole) {
-                    $authenticationServer->setUserRole($userRole);
-                }
+            if ($authenticationService->getUserRole() !== $userRole) {
+                $authenticationService->setUserRole(role: $userRole);
+            }
 
+            if (!in_array(needle: $userRole, haystack: $userRoles, strict: true)) {
                 http_response_code(StatusCodes::UNAUTHORIZED);
 
                 exit;
             }
 
-            if ($authenticationServer->getUserRole() !== $userRole) {
-                $authenticationServer->setUserRole($userRole);
-            }
-
-            return true;
-        }
-
-        if (count(value: $userRoles) === 1 && $userRoles[0] === 'guest') {
             return true;
         }
 
