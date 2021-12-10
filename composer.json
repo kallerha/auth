@@ -14,10 +14,10 @@
   "require": {
     "php": ">=8.0.0",
     "fluence-prototype/bean": "^3.0",
-    "fluence-prototype/http": "^3.0",
+    "fluence-prototype/http": "*",
     "fluence-prototype/session": "^3.0",
     "fluence-prototype/validation": "^3.0",
-    "firebase/php-jwt": "^5.4"
+    "firebase/php-jwt": "^5.5"
   },
   "autoload": {
     "psr-4": {
