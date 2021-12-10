@@ -150,7 +150,7 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
+                    if (($payload = JWT::decode(jwt: $jwtToken, keyOrKeyArray: $publicKey, allowed_algs: ['RS256'])) &&
                         is_object($payload) &&
                         isset($payload->claims) &&
                         isset($payload->claims->userId) &&
@@ -185,7 +185,7 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
+                    if (($payload = JWT::decode(jwt: $jwtToken, keyOrKeyArray: $publicKey, allowed_algs: ['RS256'])) &&
                         is_object($payload) &&
                         isset($payload->claims) &&
                         isset($payload->claims->userId) &&
