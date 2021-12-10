@@ -44,10 +44,6 @@ class AuthenticationService
         $this->sessionService->set(name: AuthenticationService::SESSION_USER_ROLE, value: $user->getRole()->getRole());
         $this->sessionService->set(name: AuthenticationService::SESSION_TIME, value: time());
 
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         if ($rememberMe === true) {
             try {
                 $reflectionClass = new ReflectionClass(objectOrClass: ClassLoader::class);
@@ -89,8 +85,15 @@ EOF;
             }
         }
 
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         session_regenerate_id(delete_old_session: false);
-        session_write_close();
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
     }
 
     /**
@@ -102,10 +105,6 @@ EOF;
         $this->sessionService->unset(name: AuthenticationService::SESSION_USER_ROLE);
         $this->sessionService->unset(name: AuthenticationService::SESSION_TIME);
 
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         setcookie(
             name: $_ENV['JWT_COOKIE_NAME'],
             value: '',
@@ -116,9 +115,16 @@ EOF;
             httponly: true
         );
 
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         session_unset();
         session_destroy();
-        session_write_close();
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
     }
 
     /**
@@ -144,7 +150,7 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if (($payload = JWT::decode(jwt: $jwtToken, keyOrKeyArray: $publicKey, allowed_algs: ['RS256'])) &&
+                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
                         is_object($payload) &&
                         isset($payload->claims) &&
                         isset($payload->claims->userId) &&
@@ -179,17 +185,21 @@ EOF;
 $publicKeyContent
 EOF;
 
-                    if (($payload = JWT::decode(jwt: $jwtToken, keyOrKeyArray: $publicKey, allowed_algs: ['RS256'])) &&
+                    if (($payload = JWT::decode(jwt: $jwtToken, key: $publicKey, allowed_algs: ['RS256'])) &&
                         is_object($payload) &&
                         isset($payload->claims) &&
                         isset($payload->claims->userId) &&
                         $this->sessionService->get(name: AuthenticationService::SESSION_USER_ID) === $payload->claims->userId) {
+
                         if (session_status() !== PHP_SESSION_ACTIVE) {
                             session_start();
                         }
 
                         session_regenerate_id(delete_old_session: false);
-                        session_write_close();
+
+                        if (session_status() === PHP_SESSION_ACTIVE) {
+                            session_write_close();
+                        }
 
                         return true;
                     }
@@ -210,7 +220,10 @@ EOF;
             }
 
             session_regenerate_id(delete_old_session: false);
-            session_write_close();
+
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
 
             return true;
         }
