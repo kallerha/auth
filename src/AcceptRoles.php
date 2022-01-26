@@ -23,7 +23,7 @@ class AcceptRoles
      * AcceptRoles constructor.
      * @param string $responseClass
      * @param array $parameters
-     * @param string ...$userRoles
+     * @param array $userRoles
      * @throws ReflectionException
      */
     public function __construct(string $responseClass, array $parameters, array $userRoles)
