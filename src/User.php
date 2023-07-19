@@ -22,8 +22,8 @@ final class User implements iUser
     use Bean;
 
     #[NotEmptyValidation('Du skal angive en e-mail')]
-    #[EmailExistsValidation('E-mailen eksisterer ikke')]
     #[EmailValidValidation('E-mailen er ikke gyldig')]
+    #[EmailExistsValidation('E-mailen eksisterer ikke')]
     private string $email;
 
     #[NotEmptyValidation('Du skal angive en adgangskode')]
