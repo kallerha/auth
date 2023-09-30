@@ -16,8 +16,7 @@
     "fluence-prototype/bean": "^3.0",
     "fluence-prototype/http": "*",
     "fluence-prototype/session": "^3.0",
-    "fluence-prototype/validation": "^3.0",
-    "firebase/php-jwt": "^5.5"
+    "fluence-prototype/validation": "^3.0"
   },
   "autoload": {
     "psr-4": {
